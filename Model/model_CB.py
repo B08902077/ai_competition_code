@@ -1,3 +1,6 @@
+"""
+使用CatBoost模型進行預測，並將預測結果寫入檔案
+"""
 import numpy as np
 import pandas as pd
 
