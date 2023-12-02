@@ -4,13 +4,12 @@
 import numpy as np
 import pandas as pd
 
-# 先決定是否保留string data，接著設定不想考慮到的column
-string_discard = False
-drop_lst = ['txkey', 'insfg', 'csmam', 'chid', 'cano', 'mchno', 'acqic'] if string_discard else ['txkey', 'insfg', 'csmam']
+# 設定不想考慮到的column
+drop_lst = ['txkey', 'insfg', 'csmam']
 
 # read data
-df_NN = pd.concat([pd.read_csv('training.csv').drop(drop_lst, axis = 1), pd.read_csv('public.csv').drop(drop_lst, axis = 1)], axis=0)
-test_NN = pd.read_csv('private_1_processed.csv')
+df_NN = pd.concat([pd.read_csv(filename).drop(drop_lst, axis = 1) for filename in ['training.csv', 'public.csv', 'private_1.csv']], axis=0)
+test_NN = pd.read_csv('private_2_processed.csv')
 test_txkey = test_NN.txkey.values.reshape(-1)
 test_NN = test_NN.drop(drop_lst, axis=1)
 
@@ -27,8 +26,8 @@ for col in test_NN.columns:
         test_NN[col] = test_NN[col].fillna(-1).astype(int)
 
 # numerical & categorical data
-NN_cat_features = [2, 3, 4, 6, 8, 10, 11, 12, 13, 14, 15, 16, 17] if string_discard else [2,3,4,5,6,7,8,10,12,14,15,16,17,18,19,20,21]
-NN_num_features = [0, 1, 5, 7, 9] if string_discard else [0,1,9,11,13]
+NN_cat_features = [2,3,4,5,6,7,8,10,12,14,15,16,17,18,19,20,21]
+NN_num_features = [0,1,9,11,13]
 cat_num = len(NN_cat_features)
 
 # train
@@ -93,13 +92,11 @@ model = Model(inputs=[in_cat, in_num], outputs=output)
 # compile, train, and predict
 model.compile(loss='binary_crossentropy', optimizer='adam')
 history = model.fit([X_cat_enc, X_num_std], y_NN,
-                    epochs=10, batch_size=256, verbose=1, class_weight={0: 1, 1: 100})
+                    epochs=3, batch_size=256, verbose=1, class_weight={0: 1, 1: 100})
 
 prediction_NN = model.predict([test_cat_enc, test_num_std])
 prediction_NN = [int(i > 0.5) for i in prediction_NN.ravel()]
 
 # 將預測結果寫入檔案
 df_result = pd.DataFrame({'txkey': test_txkey, 'pred': prediction_NN})
-df_result.to_csv(f'result_NN{"_NoString" if string_discard else ""}.csv', index=False)
-
-
+df_result.to_csv(f'result_NN.csv', index=False)

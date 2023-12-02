@@ -6,17 +6,16 @@ import pandas as pd
 
 # CatBoost
 from catboost import CatBoostClassifier
-clf_CB = CatBoostClassifier(cat_features=[2,3,6,7],
-                            silent = True,
-                            class_weights = [1,200])
 
-# 先決定是否保留string data，接著設定不想考慮到的column
-string_discard = False
-drop_lst = ['txkey', 'insfg', 'csmam', 'chid', 'cano', 'mchno', 'acqic'] if string_discard else ['txkey', 'insfg', 'csmam']
+# 設定不想考慮到的column
+drop_lst = ['txkey', 'insfg', 'csmam']
+clf_CB = CatBoostClassifier(cat_features=[2,3,6,7],
+                                silent = True,
+                                class_weights = [1,200])
 
 # read data
-df_CB = pd.concat([pd.read_csv('training.csv').drop(drop_lst, axis = 1), pd.read_csv('public.csv').drop(drop_lst, axis = 1)], axis=0)
-test_CB = pd.read_csv('private_1_processed.csv')
+df_CB = pd.concat([pd.read_csv(filename).drop(drop_lst, axis = 1) for filename in ['training.csv', 'public.csv', 'private_1.csv']], axis=0)
+test_CB = pd.read_csv('private_2_processed.csv')
 test_txkey = test_CB.txkey.values.reshape(-1)
 test_CB = test_CB.drop(drop_lst, axis=1)
 
@@ -43,4 +42,4 @@ prediction_CB = clf_CB.predict(X_test_CB)
 
 # 將預測結果寫入檔案
 df_result = pd.DataFrame({'txkey': test_txkey, 'pred': prediction_CB})
-df_result.to_csv(f'result_CB{"_NoString" if string_discard else ""}.csv', index=False)
+df_result.to_csv(f'result_CB.csv', index=False)
