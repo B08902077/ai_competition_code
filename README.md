@@ -14,7 +14,7 @@
 └ README
 ```
 ## 程式碼執行
-假設Model資料夾已存放了`training.csv`, `public.csv`, `private_1_processed.csv`等資料檔案，首先執行Model資料夾裡面的python程式:  
+假設Model資料夾已存放了`training.csv`, `public.csv`, `private_1.csv`和 `private_2_processed.csv`等資料檔案，首先執行Model資料夾裡面的python程式:  
 ```
 python ./Model/model_CB.py
 python ./Model/model_LGBM.py
